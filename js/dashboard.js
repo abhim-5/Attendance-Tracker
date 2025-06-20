@@ -1,3 +1,9 @@
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 // Firebase Auth and Firestore
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -94,21 +100,31 @@ async function loadSubjects(userId) {
             e.stopPropagation();
             const newName = prompt("Enter new subject name:", data.name);
             if (newName && newName.trim() && newName !== data.name) {
-                await db.collection("subjects").doc(doc.id).update({ name: newName.trim() });
+                await db
+                    .collection("subjects")
+                    .doc(doc.id)
+                    .update({ name: newName.trim() });
                 await loadSubjects(userId);
                 if (excelPreviewEnabled) await renderExcelPreview();
             }
         });
 
         // Prevent card click when clicking delete
-        card.querySelector(".delete-btn").addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (confirm(`Are you sure you want to delete "${data.name}"? This cannot be undone.`)) {
-                await db.collection("subjects").doc(doc.id).delete();
-                await loadSubjects(userId);
-                if (excelPreviewEnabled) await renderExcelPreview();
+        card.querySelector(".delete-btn").addEventListener(
+            "click",
+            async (e) => {
+                e.stopPropagation();
+                if (
+                    confirm(
+                        `Are you sure you want to delete "${data.name}"? This cannot be undone.`
+                    )
+                ) {
+                    await db.collection("subjects").doc(doc.id).delete();
+                    await loadSubjects(userId);
+                    if (excelPreviewEnabled) await renderExcelPreview();
+                }
             }
-        });
+        );
 
         subjectList.appendChild(card);
     });
@@ -194,8 +210,12 @@ async function renderExcelPreview() {
         headerRowClone.classList.add("sticky-bottom-row");
         table.appendChild(headerRowClone);
 
-        const ths = table.querySelectorAll("tr:first-child th, tr:first-child td");
-        const tds = table.querySelectorAll("tr:last-child th, tr:last-child td");
+        const ths = table.querySelectorAll(
+            "tr:first-child th, tr:first-child td"
+        );
+        const tds = table.querySelectorAll(
+            "tr:last-child th, tr:last-child td"
+        );
         tds.forEach((td, i) => {
             td.className = ths[i].className;
             td.style = ths[i].style.cssText;
