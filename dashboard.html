@@ -168,6 +168,68 @@
             .add-subject:hover {
                 background-color: #b9d4099f !important;
             }
+
+            /* Responsive fixes for mobile */
+            @media (max-width: 600px) {
+                .actions {
+                    flex-direction: row;
+                    gap: 12px;
+                }
+                .actions button {
+                    width: 50%;
+                    white-space: nowrap;
+                }
+                #subjectForm {
+                    flex-direction: column;
+                    gap: 18px !important;
+                    display: flex;
+                    align-items: center;
+                }
+                #subjectForm input {
+                    width: 80%;
+                    margin-left: 0 !important;
+                }
+                #subjectForm button {
+                    width: 50%;
+                }
+            }
+            .actions button {
+                white-space: nowrap;
+            }
+
+            /* Make the date column sticky in the Excel preview table */
+            #excelPreview table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 600px;
+            }
+            #excelPreview th {
+                background-color: rgba(255, 255, 0, 0.482) !important;
+            }
+           
+            #excelPreview th,
+            #excelPreview td {
+                padding: 12px;
+                border: 1px solid #333;
+                text-align: center;
+                background-color: #1a1a1a;
+            }
+
+            #excelPreview th:first-child,
+            #excelPreview td:first-child {
+                position: sticky;
+                left: 0;
+                background: rgba(111, 178, 44, 0.482) !important;
+                z-index: 2;
+                min-width: 50px; /* Reduced from 110px */
+                max-width: 90px;
+                width: 60px;
+                box-shadow: 2px 0 5px #0004;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+
         </style>
     </head>
     <body>
