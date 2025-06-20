@@ -172,10 +172,34 @@ document.getElementById("showExcel").addEventListener("click", async () => {
 
         table.appendChild(tr);
     });
-
-    preview.innerHTML = "<h2>📊 Excel Preview</h2>";
-    preview.appendChild(table);
+    // Place the heading before the preview box
     preview.style.display = "block";
+    const container = preview.parentElement;
+    let heading = container.querySelector("#excelPreviewHeading");
+    if (!heading) {
+        heading = document.createElement("h2");
+        heading.id = "excelPreviewHeading";
+        heading.textContent = "📊 Excel Preview";
+        container.insertBefore(heading, preview);
+    }
+    preview.innerHTML = ""; // Only the table goes here
+    preview.appendChild(table);
+
+    // Only duplicate the header row if there are more than 15 data rows
+    const dataRowCount = dates.length;
+    if (dataRowCount > 15) {
+        const headerRowClone = table.querySelector("tr").cloneNode(true);
+        headerRowClone.classList.add("sticky-bottom-row"); // Add this line
+        table.appendChild(headerRowClone);
+
+        // Ensure the last row cells have the same classes as the header
+        const ths = table.querySelectorAll("tr:first-child th, tr:first-child td");
+        const tds = table.querySelectorAll("tr:last-child th, tr:last-child td");
+        tds.forEach((td, i) => {
+            td.className = ths[i].className;
+            td.style = ths[i].style.cssText;
+        });
+    }
 });
 
 // Download Excel file
