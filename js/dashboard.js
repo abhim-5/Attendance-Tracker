@@ -14,7 +14,7 @@ auth.onAuthStateChanged((user) => {
     if (!user) {
         window.location.href = "index.html";
     } else {
-        loadSubjects(user.uid);
+        loadSubjects(user.uid); // Remove .then(() => renderExcelPreview());
     }
 });
 
@@ -23,6 +23,13 @@ const subjectForm = document.getElementById("subjectForm");
 const subjectInput = document.getElementById("subjectInput");
 const subjectList = document.getElementById("subjectList");
 const preview = document.getElementById("excelPreview");
+let excelPreviewEnabled = false;
+
+// Show Excel Preview button
+document.getElementById("showExcel").addEventListener("click", async () => {
+    excelPreviewEnabled = true;
+    await renderExcelPreview();
+});
 
 // Add new subject
 subjectForm.addEventListener("submit", async (e) => {
@@ -38,11 +45,11 @@ subjectForm.addEventListener("submit", async (e) => {
     });
 
     subjectInput.value = "";
-    loadSubjects(userId);
+    await loadSubjects(userId);
+    if (excelPreviewEnabled) await renderExcelPreview();
 });
 
 // Load subjects and display cards
-
 async function loadSubjects(userId) {
     subjectList.innerHTML = "";
 
@@ -70,7 +77,7 @@ async function loadSubjects(userId) {
   </div>
   <p>
     <span style="color:#00c853;font-weight:bold;">Present</span> : ${totalP} &nbsp; 
-    <span style="color:#ff1744;font-weight:bold;">Absent</span>  : ${totalA}
+    <span style="color:#ff1744;font-weight:bold;">Absent</span>  : ${totalA}
   </p>
   <p><strong>📊 ${percentage}% Attendance</strong></p>
 `;
@@ -82,41 +89,35 @@ async function loadSubjects(userId) {
             window.location.href = "subject.html";
         });
 
-        // Prevent card click when clicking edit or delete
+        // Prevent card click when clicking edit
         card.querySelector(".edit-btn").addEventListener("click", async (e) => {
             e.stopPropagation();
             const newName = prompt("Enter new subject name:", data.name);
             if (newName && newName.trim() && newName !== data.name) {
-                await db
-                    .collection("subjects")
-                    .doc(doc.id)
-                    .update({ name: newName.trim() });
-                loadSubjects(userId);
+                await db.collection("subjects").doc(doc.id).update({ name: newName.trim() });
+                await loadSubjects(userId);
+                if (excelPreviewEnabled) await renderExcelPreview();
             }
         });
 
-        card.querySelector(".delete-btn").addEventListener(
-            "click",
-            async (e) => {
-                e.stopPropagation();
-                if (
-                    confirm(
-                        `Are you sure you want to delete "${data.name}"? This cannot be undone.`
-                    )
-                ) {
-                    await db.collection("subjects").doc(doc.id).delete();
-                    loadSubjects(userId);
-                }
+        // Prevent card click when clicking delete
+        card.querySelector(".delete-btn").addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (confirm(`Are you sure you want to delete "${data.name}"? This cannot be undone.`)) {
+                await db.collection("subjects").doc(doc.id).delete();
+                await loadSubjects(userId);
+                if (excelPreviewEnabled) await renderExcelPreview();
             }
-        );
+        });
 
         subjectList.appendChild(card);
     });
 }
 
-// Preview Excel in-browser
-document.getElementById("showExcel").addEventListener("click", async () => {
+// Render Excel Preview
+async function renderExcelPreview() {
     const userId = auth.currentUser.uid;
+
     const snapshot = await db
         .collection("subjects")
         .where("userId", "==", userId)
@@ -156,7 +157,7 @@ document.getElementById("showExcel").addEventListener("click", async () => {
     dates.forEach((date) => {
         const tr = document.createElement("tr");
         const tdDate = document.createElement("td");
-        tdDate.textContent = formatDate(date); // <-- CHANGED
+        tdDate.textContent = formatDate(date);
         tr.appendChild(tdDate);
 
         subjects.forEach((subj) => {
@@ -172,7 +173,7 @@ document.getElementById("showExcel").addEventListener("click", async () => {
 
         table.appendChild(tr);
     });
-    // Place the heading before the preview box
+
     preview.style.display = "block";
     const container = preview.parentElement;
     let heading = container.querySelector("#excelPreviewHeading");
@@ -182,17 +183,17 @@ document.getElementById("showExcel").addEventListener("click", async () => {
         heading.textContent = "📊 Excel Preview";
         container.insertBefore(heading, preview);
     }
-    preview.innerHTML = ""; // Only the table goes here
+
+    preview.innerHTML = "";
     preview.appendChild(table);
 
-    // Only duplicate the header row if there are more than 15 data rows
+    // Sticky bottom header for long tables
     const dataRowCount = dates.length;
     if (dataRowCount > 15) {
         const headerRowClone = table.querySelector("tr").cloneNode(true);
-        headerRowClone.classList.add("sticky-bottom-row"); // Add this line
+        headerRowClone.classList.add("sticky-bottom-row");
         table.appendChild(headerRowClone);
 
-        // Ensure the last row cells have the same classes as the header
         const ths = table.querySelectorAll("tr:first-child th, tr:first-child td");
         const tds = table.querySelectorAll("tr:last-child th, tr:last-child td");
         tds.forEach((td, i) => {
@@ -200,11 +201,12 @@ document.getElementById("showExcel").addEventListener("click", async () => {
             td.style = ths[i].style.cssText;
         });
     }
-});
+}
 
 // Download Excel file
 document.getElementById("downloadExcel").addEventListener("click", async () => {
     const userId = auth.currentUser.uid;
+
     const snapshot = await db
         .collection("subjects")
         .where("userId", "==", userId)
@@ -237,13 +239,11 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
 
     const finalData = [header, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(finalData);
-
-    // Set column widths (make cells wider)
     ws["!cols"] = [{ wch: 14 }, ...subjects.map(() => ({ wch: 12 }))];
 
-    // Center all cells
     const totalRows = finalData.length;
     const totalCols = header.length;
+
     for (let r = 0; r < totalRows; r++) {
         for (let c = 0; c < totalCols; c++) {
             const cell = ws[XLSX.utils.encode_cell({ r, c })];
@@ -254,7 +254,6 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
         }
     }
 
-    // Bold the header row (supported in some viewers)
     header.forEach((col, idx) => {
         const cell = ws[XLSX.utils.encode_cell({ r: 0, c: idx })];
         if (cell) {
@@ -262,7 +261,6 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
         }
     });
 
-    // Bold the date column (supported in some viewers)
     for (let r = 1; r <= dates.length; r++) {
         const cell = ws[XLSX.utils.encode_cell({ r, c: 0 })];
         if (cell) {
@@ -270,7 +268,6 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
         }
     }
 
-    // Bold "P" and "A" (supported in some viewers)
     for (let r = 1; r <= dates.length; r++) {
         for (let c = 1; c <= subjects.length; c++) {
             const cell = ws[XLSX.utils.encode_cell({ r, c })];

@@ -218,7 +218,7 @@
                 background: #111;
                 color: white;
                 border: none;
-                
+
                 font-size: 1rem;
                 padding: 6px 5px; /* Smaller padding for reduced height */
                 box-sizing: border-box;
@@ -296,6 +296,15 @@
                             ? dateInput.showPicker()
                             : dateInput.focus();
                     });
+                }
+
+                // Prevent selecting future dates
+                if (dateInput) {
+                    const today = new Date();
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, "0");
+                    const dd = String(today.getDate()).padStart(2, "0");
+                    dateInput.max = `${yyyy}-${mm}-${dd}`;
                 }
             });
         </script>
