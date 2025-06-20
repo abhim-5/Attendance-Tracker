@@ -127,12 +127,11 @@
             #excelPreview {
                 background: #111;
                 margin-top: 40px;
-                padding: 20px;
+                padding: 0;
                 border-radius: 10px;
-                overflow-x: auto;
                 display: none;
+                overflow: visible; /* Crucial: allow full page scroll */
             }
-
             table {
                 width: 100%;
                 border-collapse: collapse;
@@ -204,9 +203,13 @@
                 min-width: 600px;
             }
             #excelPreview th {
-                background-color: rgba(255, 255, 0, 0.482) !important;
+                position: sticky;
+                top: 0px;
+                z-index: 3;
+                background-color: rgba(255, 255, 0, 0.8) !important;
+                backdrop-filter: blur(4px);
             }
-           
+
             #excelPreview th,
             #excelPreview td {
                 padding: 12px;
@@ -229,7 +232,16 @@
                 white-space: nowrap;
             }
 
-
+            thead th {
+                position: sticky;
+                top: 0;
+                background-color: #222;
+                z-index: 10;
+                color: white;
+                font-weight: bold;
+                border-bottom: 2px solid #00d8ff;
+                backdrop-filter: blur(6px);
+            }
         </style>
     </head>
     <body>

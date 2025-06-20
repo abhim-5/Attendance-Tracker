@@ -114,7 +114,70 @@ async function loadSubjects(userId) {
     });
 }
 
-// Preview Excel in-browser
+// // Preview Excel in-browser
+// document.getElementById("showExcel").addEventListener("click", async () => {
+//     const userId = auth.currentUser.uid;
+//     const snapshot = await db
+//         .collection("subjects")
+//         .where("userId", "==", userId)
+//         .get();
+
+//     const subjects = [];
+//     const dateMap = new Map();
+
+//     snapshot.forEach((doc) => {
+//         const data = doc.data();
+//         subjects.push({ name: data.name, attendance: data.attendance || [] });
+
+//         data.attendance?.forEach((entry) => {
+//             if (!dateMap.has(entry.date)) {
+//                 dateMap.set(entry.date, {});
+//             }
+//             dateMap.get(entry.date)[data.name] = entry.status;
+//         });
+//     });
+
+//     const dates = Array.from(dateMap.keys()).sort();
+//     const table = document.createElement("table");
+
+//     const headerRow = document.createElement("tr");
+//     const dateTh = document.createElement("th");
+//     dateTh.textContent = "📅 Date";
+//     headerRow.appendChild(dateTh);
+
+//     subjects.forEach((subj) => {
+//         const th = document.createElement("th");
+//         th.textContent = subj.name;
+//         headerRow.appendChild(th);
+//     });
+
+//     table.appendChild(headerRow);
+
+//     dates.forEach((date) => {
+//         const tr = document.createElement("tr");
+//         const tdDate = document.createElement("td");
+//         tdDate.textContent = formatDate(date); // <-- CHANGED
+//         tr.appendChild(tdDate);
+
+//         subjects.forEach((subj) => {
+//             const td = document.createElement("td");
+//             const val = dateMap.get(date)?.[subj.name] || "";
+//             td.textContent = val;
+
+//             if (val === "P") td.classList.add("present");
+//             if (val === "A") td.classList.add("absent");
+
+//             tr.appendChild(td);
+//         });
+
+//         table.appendChild(tr);
+//     });
+
+//     preview.innerHTML = "<h2>📊 Excel Preview</h2>";
+//     preview.appendChild(table);
+//     preview.style.display = "block";
+// });
+
 document.getElementById("showExcel").addEventListener("click", async () => {
     const userId = auth.currentUser.uid;
     const snapshot = await db
@@ -138,7 +201,10 @@ document.getElementById("showExcel").addEventListener("click", async () => {
     });
 
     const dates = Array.from(dateMap.keys()).sort();
+
     const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody"); // Create header row
 
     const headerRow = document.createElement("tr");
     const dateTh = document.createElement("th");
@@ -151,12 +217,13 @@ document.getElementById("showExcel").addEventListener("click", async () => {
         headerRow.appendChild(th);
     });
 
-    table.appendChild(headerRow);
+    thead.appendChild(headerRow);
+    table.appendChild(thead); // Create body rows
 
     dates.forEach((date) => {
         const tr = document.createElement("tr");
         const tdDate = document.createElement("td");
-        tdDate.textContent = formatDate(date); // <-- CHANGED
+        tdDate.textContent = formatDate(date);
         tr.appendChild(tdDate);
 
         subjects.forEach((subj) => {
@@ -170,8 +237,10 @@ document.getElementById("showExcel").addEventListener("click", async () => {
             tr.appendChild(td);
         });
 
-        table.appendChild(tr);
+        tbody.appendChild(tr);
     });
+
+    table.appendChild(tbody);
 
     preview.innerHTML = "<h2>📊 Excel Preview</h2>";
     preview.appendChild(table);
