@@ -1,0 +1,147 @@
+/* Base Reset & Globals */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  color: #fff;
+}
+
+/* ==== Login Page ==== */
+.login-body {
+  background: linear-gradient(120deg, #001f3f, #0074D9);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.app-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  animation: popIn 0.7s ease-out forwards;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.tab-switch {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-switch button {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  color: white;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.tab-switch button.active {
+  border-bottom: 2px solid #00d8ff;
+  color: #00d8ff;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: 0.3s;
+}
+
+input:focus {
+  background: rgba(255, 255, 255, 0.2);
+  outline: 2px solid #00d8ff;
+}
+
+button[type="submit"] {
+  background: #00d8ff;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button[type="submit"]:hover {
+  background: #00bfff;
+}
+
+.error-msg {
+  margin-top: 10px;
+  color: #ff4c4c;
+  font-size: 0.9rem;
+}
+
+/* Loader Spinner */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.loader p {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #00d8ff;
+}
+
+.circle-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #00d8ff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

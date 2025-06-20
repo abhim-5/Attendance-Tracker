@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard - Attendance Tracker</title>
+        <link rel="icon" type="image/x-icon" href="assets/attendance.png" />
+        <!-- Remix Icon CDN -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+            rel="stylesheet" />
+        <!-- Firebase SDKs (only once!) -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+        <!-- SheetJS for Excel -->
+        <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+        <!-- Firebase Config -->
+        <script src="js/firebase-config.js"></script>
+
+        <!-- Page Script -->
+        <script src="js/dashboard.js" defer></script>
+
+        <style>
+            body {
+                background-color: #000;
+                font-family: "Segoe UI", sans-serif;
+                color: #fff;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: auto;
+                padding: 40px 20px;
+                text-align: center;
+            }
+
+            h1 {
+                color: #00d8ff;
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+
+            #subjectForm input {
+                padding: 12px;
+                width: 60%;
+                border-radius: 8px;
+                border: none;
+                font-size: 1rem;
+            }
+
+            #subjectForm button {
+                padding: 12px 20px;
+                margin-left: 10px;
+                background-color: #00d8ff;
+                color: black;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                cursor: pointer;
+            }
+
+            .subject-list {
+                margin-top: 30px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+            }
+
+            .subject-card {
+                background: #111;
+                padding: 20px;
+                border-radius: 10px;
+                width: 220px;
+                box-shadow: 0 0 10px #00d8ff40;
+                cursor: pointer;
+                transition: 0.3s ease;
+            }
+
+            .subject-card:hover {
+                background: #222;
+                transform: translateY(-5px);
+            }
+
+            .subject-card h3 {
+                margin: 0;
+                font-size: 1.2rem;
+            }
+
+            .subject-card p {
+                margin: 5px 0;
+                color: #ccc;
+            }
+
+            .actions {
+                margin-top: 40px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .actions button {
+                background: #00d8ff;
+                color: black;
+                font-weight: bold;
+                font-size: 1rem;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .actions button:hover {
+                background: #198edcbb;
+            }
+
+            #excelPreview {
+                background: #111;
+                margin-top: 40px;
+                padding: 20px;
+                border-radius: 10px;
+                overflow-x: auto;
+                display: none;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th,
+            td {
+                padding: 12px;
+                border: 1px solid #333;
+                text-align: center;
+            }
+
+            th {
+                background-color: #00d8ff33;
+            }
+
+            td {
+                background-color: #1a1a1a;
+            }
+
+            td.present {
+                color: limegreen;
+                font-weight: bold;
+            }
+
+            td.absent {
+                color: red;
+                font-weight: bold;
+            }
+            .add-subject {
+                background-color: yellow !important;
+            }
+            .add-subject:hover {
+                background-color: #b9d4099f !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1><i class="ri-calendar-check-fill"></i> Dashboard</h1>
+
+            <form id="subjectForm">
+                <input
+                    type="text"
+                    id="subjectInput"
+                    placeholder="Enter subject name"
+                    required />
+                <button class="add-subject" type="submit">
+                    <i class="ri-add-circle-line"></i> Add Subject
+                </button>
+            </form>
+
+            <div class="subject-list" id="subjectList"></div>
+
+            <div class="actions">
+                <button id="showExcel">
+                    <i class="ri-table-line"></i> Show Excel
+                </button>
+                <button id="downloadExcel">
+                    <i class="ri-download-2-line"></i> Download Excel
+                </button>
+            </div>
+
+            <div id="excelPreview"></div>
+        </div>
+    </body>
+</html>

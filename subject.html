@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Subject Details</title>
+        <link rel="icon" type="image/x-icon" href="assets/attendance.png" />
+        <!-- Remix Icon CDN -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+            rel="stylesheet" />
+
+        <style>
+            body {
+                background: #0a0a0a;
+                color: white;
+                font-family: "Segoe UI", sans-serif;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 750px;
+                margin: auto;
+                background: rgba(30, 30, 30, 0.95);
+                border-radius: 18px;
+                padding: 30px;
+                box-shadow: 0 0 30px rgba(0, 200, 255, 0.1);
+                backdrop-filter: blur(10px);
+            }
+
+            h1 {
+                text-align: center;
+                color: #00d8ff;
+                margin-bottom: 10px;
+            }
+
+            label {
+                font-weight: bold;
+                display: block;
+                margin-top: 25px;
+                margin-bottom: 5px;
+                font-size: 1rem;
+            }
+
+            input[type="date"] {
+                padding: 12px;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                background: #222;
+                color: white;
+                font-size: 1rem;
+                outline: none;
+            }
+
+            .btn-group {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 15px;
+                gap: 10px;
+            }
+
+            .btn-group button {
+                flex: 1;
+                padding: 12px;
+                border: none;
+                border-radius: 10px;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: 0.3s ease;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-group .present {
+                background-color: #00ff99;
+                color: black;
+            }
+
+            .btn-group .absent {
+                background-color: #ff4d4d;
+                color: black;
+            }
+
+            .btn-group .present:hover {
+                background-color: #00cc77;
+            }
+
+            .btn-group .absent:hover {
+                background-color: #e03b3b;
+            }
+
+            .stats {
+                margin-top: 30px;
+                padding: 20px;
+                background: #111;
+                border-radius: 12px;
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+            }
+
+            .stats h3 {
+                color: #00d8ff;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .log {
+                margin-top: 25px;
+            }
+
+            .log h3 {
+                font-size: 1.2rem;
+                color: #00d8ff;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .log-entry {
+                background: #1c1c1c;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+            }
+
+            .log-entry.present {
+                border-left: 6px solid #00ff88;
+            }
+
+            .log-entry.absent {
+                border-left: 6px solid #ff4c4c;
+            }
+
+            .log-entry span i {
+                margin-right: 6px;
+            }
+
+            .tag {
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+
+            @media (max-width: 600px) {
+                .btn-group {
+                    flex-direction: column;
+                }
+            }
+
+            /* Add to <style> in subject.html */
+            .tag.present-tag {
+                color: #00ff88;
+            }
+            .tag.absent-tag {
+                color: #ff4d4d;
+            }
+            .remove-btn {
+                background: none;
+                border: none;
+                color: #ff4d4d;
+                font-size: 0.95rem;
+                cursor: pointer;
+                margin-left: 6px;
+                padding: 0 4px;
+                line-height: 1;
+                height: 22px;
+                width: 22px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: color 0.2s, background 0.2s;
+            }
+            .remove-btn:hover {
+                color: #fff;
+                background: #ff4d4d33;
+                border-radius: 50%;
+            }
+
+            .date-bar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-weight: bold;
+                margin-top: 25px;
+                margin-bottom: 5px;
+                font-size: 1.1rem;
+                cursor: pointer;
+                user-select: none;
+                position: relative;
+                height: 48px;
+                background-color: #111;
+                border: 2px solid #31393b;
+                border-radius: 10px;
+            }
+
+            .calendar-icon {
+                font-size: 2.2rem;
+                color: #00d8ff;
+                transition: color 0.2s;
+            }
+
+            .date-bar input[type="date"] {
+                flex: 1;
+                min-width: 0;
+                margin-left: 10px;
+                cursor: pointer;
+                background: #111;
+                color: white;
+                border: none;
+                
+                font-size: 1.2rem;
+                padding: 6px 8px; /* Smaller padding for reduced height */
+                box-sizing: border-box;
+                line-height: 1.2;
+            }
+
+            /* Custom calendar icon for Chrome, Edge, Safari */
+            .date-bar input[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(53%) sepia(99%) saturate(747%) hue-rotate(151deg)
+                    brightness(102%) contrast(101%);
+                /* This makes it cyan-ish */
+                width: 32px;
+                height: 32px;
+                cursor: pointer;
+            }
+
+            /* Custom calendar icon for Firefox */
+            .date-bar input[type="date"]::-moz-calendar-picker-indicator {
+                filter: invert(53%) sepia(99%) saturate(747%) hue-rotate(151deg)
+                    brightness(102%) contrast(101%);
+                width: 32px;
+                height: 32px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 id="subjectTitle">Subject Name</h1>
+
+            <div class="date-bar" id="dateBar">
+                <i class="ri-calendar-check-line calendar-icon"></i>
+                <span>Select Date:</span>
+                <input type="date" id="datePicker" />
+            </div>
+
+            <div class="btn-group">
+                <button class="present" onclick="markAttendance('P')">
+                    <i class="ri-checkbox-circle-line"></i> Mark Present
+                </button>
+                <button class="absent" onclick="markAttendance('A')">
+                    <i class="ri-close-circle-line"></i> Mark Absent
+                </button>
+            </div>
+
+            <div class="stats" id="stats">
+                <h3><i class="ri-bar-chart-2-fill"></i> Attendance Stats</h3>
+                <!-- Will be filled by JS -->
+            </div>
+
+            <div class="log">
+                <h3><i class="ri-time-line"></i> Attendance Log</h3>
+                <div id="logList">
+                    <!-- Logs injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Firebase SDKs: MUST be loaded BEFORE your config and logic scripts -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+        <!-- Firebase Config & App Logic -->
+        <script src="js/firebase-config.js"></script>
+        <script src="js/subject.js"></script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const dateBar = document.getElementById("dateBar");
+                const dateInput = document.getElementById("datePicker");
+                if (dateBar && dateInput) {
+                    dateBar.addEventListener("click", function () {
+                        dateInput.showPicker
+                            ? dateInput.showPicker()
+                            : dateInput.focus();
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>
