@@ -8,11 +8,13 @@
 
 body {
   color: #fff;
+  
 }
 
 /* ==== Login Page ==== */
 .login-body {
-  background: linear-gradient(120deg, #001f3f, #0074D9);
+  background: url("/assets/blue.jpg") no-repeat center center fixed;
+  background-size: 100% 109%;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -23,7 +25,7 @@ body {
   background: rgba(0, 0, 0, 0.7);
   padding: 40px 30px;
   border-radius: 20px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 20px rgba(26, 13, 198, 0.6);
   width: 90%;
   max-width: 400px;
   text-align: center;
@@ -144,4 +146,28 @@ button[type="submit"]:hover {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+
+@media (max-width: 600px) {
+  .login-body {
+    background: none !important; /* Remove desktop bg on mobile */
+    position: relative;
+    overflow: hidden;
+  }
+  .login-body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: url("/assets/bluer.jpg") no-repeat center center;
+    background-size: 111% 100%;
+   backdrop-filter: blur(10px);
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    pointer-events: none;
+  }
 }

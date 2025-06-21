@@ -12,26 +12,52 @@
 
         <style>
             body {
-                background: #0a0a0a;
+                background: url("/assets/red.png") no-repeat center center fixed;
+                background-size: 100% 110%;
                 color: white;
                 font-family: "Segoe UI", sans-serif;
                 margin: 0;
                 padding: 20px;
             }
 
+            @media (max-width: 600px) {
+                body {
+                    background: none !important;
+                    position: relative;
+                    overflow-x: none;
+                }
+                body::before {
+                    content: "";
+                    position: fixed;
+                    inset: 0;
+                    z-index: -1;
+                    background: url("/assets/redr.png") no-repeat center center;
+                    background-size: 110% 100%;
+                    overflow-x: none;
+                    width: 100vw;
+                    height: 100vh;
+                    left: 0;
+                    top: 0;
+                    opacity: 1;
+                    pointer-events: none;
+                }
+            }
+
             .container {
                 max-width: 750px;
                 margin: auto;
-                background: rgba(30, 30, 30, 0.95);
+
+             backdrop-filter: blur(3px);
                 border-radius: 18px;
                 padding: 30px;
-                box-shadow: 0 0 30px rgba(0, 200, 255, 0.1);
-                backdrop-filter: blur(10px);
+            }
+            .shadow {
+                filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.5));
             }
 
             h1 {
                 text-align: center;
-                color: #00d8ff;
+                color: #dd1a1a;
                 margin-bottom: 10px;
             }
 
@@ -98,8 +124,8 @@
                 margin-top: 30px;
                 padding: 20px;
                 background: #111;
-                border-radius: 12px;
-                box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+                border-radius: 16px;
+                box-shadow: 2px 3px 50px rgba(230, 12, 12, 0.1);
             }
 
             .stats h3 {
@@ -168,21 +194,21 @@
             .remove-btn {
                 background: none;
                 border: none;
-                color: #ff4d4d;
-                font-size: 0.95rem;
+                color: #fff; /* Make the cross white */
+                font-size: 0.8rem; /* Make it even shorter */
                 cursor: pointer;
                 margin-left: 6px;
-                padding: 0 4px;
+                padding: 0 2px; /* Reduce horizontal padding */
                 line-height: 1;
-                height: 22px;
-                width: 22px;
+                height: 15px; /* Shorter height */
+                width: 15px; /* Shorter width */
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 transition: color 0.2s, background 0.2s;
             }
             .remove-btn:hover {
-                color: #fff;
+                color: #ff4d4d;
                 background: #ff4d4d33;
                 border-radius: 50%;
             }
@@ -190,11 +216,11 @@
             .date-bar {
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                gap: 8px;
                 font-weight: bold;
                 margin-top: 25px;
                 margin-bottom: 5px;
-                font-size: 1.1rem;
+                font-size: 1rem;
                 cursor: pointer;
                 user-select: none;
                 position: relative;
@@ -243,19 +269,57 @@
                 height: 32px;
                 cursor: pointer;
             }
+
+            @keyframes log-pop-in {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.5);
+                    max-height: 0;
+                }
+                70% {
+                    opacity: 1;
+                    transform: scale(1.05);
+                    max-height: 100px;
+                    animation-timing-function: ease-in-out;
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                    max-height: 100px;
+                }
+            }
+            .log-entry.animated-in {
+                animation: log-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            }
+
+            @keyframes fadeInUp {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.5) translateY(40px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+            .fade-in-up {
+                opacity: 0;
+                animation: fadeInUp 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)
+                    forwards;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1 id="subjectTitle">Subject Name</h1>
+            <h1 id="subjectTitle" class="fade-in-up">Subject Name</h1>
 
-            <div class="date-bar" id="dateBar">
+            <div class="date-bar fade-in-up shadow" id="dateBar">
                 <i class="ri-calendar-check-line calendar-icon"></i>
                 <span>Select Date:</span>
                 <input type="date" id="datePicker" />
             </div>
 
-            <div class="btn-group">
+            <div class="btn-group fade-in-up">
                 <button class="present" onclick="markAttendance('P')">
                     <i class="ri-checkbox-circle-line"></i> Mark Present
                 </button>
@@ -264,12 +328,12 @@
                 </button>
             </div>
 
-            <div class="stats" id="stats">
+            <div class="stats fade-in-up shadow" id="stats">
                 <h3><i class="ri-bar-chart-2-fill"></i> Attendance Stats</h3>
                 <!-- Will be filled by JS -->
             </div>
 
-            <div class="log">
+            <div class="log fade-in-up">
                 <h3><i class="ri-time-line"></i> Attendance Log</h3>
                 <div id="logList">
                     <!-- Logs injected by JS -->
@@ -306,6 +370,12 @@
                     const dd = String(today.getDate()).padStart(2, "0");
                     dateInput.max = `${yyyy}-${mm}-${dd}`;
                 }
+            });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll(".fade-in-up").forEach((el, i) => {
+                    el.style.animationDelay = i * 0.2 + "s";
+                });
             });
         </script>
     </body>

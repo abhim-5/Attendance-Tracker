@@ -25,11 +25,36 @@
 
         <style>
             body {
-                background-color: #000;
+                background: url("/assets/yellow.jpg") no-repeat center center fixed;
+                background-size: 100% 109%;
                 font-family: "Segoe UI", sans-serif;
                 color: #fff;
                 margin: 0;
                 padding: 0;
+            }
+
+            @media (max-width: 600px) {
+                body {
+                    background: none !important; 
+                    position: relative;
+                    overflow-x:none;
+                    
+                }
+                body::before {
+                    content: "";
+                    position: fixed;
+                    inset: 0;
+                    z-index: -1;
+                    background: url("/assets/yellowr.jpg") no-repeat center center;
+                    background-size: 110% 100%;
+                    overflow-x:none;
+                    width: 100vw;
+                    height: 100vh;
+                    left: 0;
+                    top: 0;
+                    opacity: 1;
+                    pointer-events: none;
+                }
             }
 
             .container {
@@ -37,6 +62,7 @@
                 margin: auto;
                 padding: 40px 20px;
                 text-align: center;
+                backdrop-filter: blur(1px);
             }
 
             h1 {
@@ -77,7 +103,7 @@
                 padding: 20px;
                 border-radius: 10px;
                 width: 220px;
-                box-shadow: 0 0 10px #00d8ff40;
+                box-shadow: 0 0 5px #fcd16e;
                 cursor: pointer;
                 transition: 0.3s ease;
             }
@@ -163,7 +189,7 @@
                 font-weight: bold;
             }
             .add-subject {
-                background-color: yellow !important;
+                background-color: #fcd16e !important;
             }
             .add-subject:hover {
                 background-color: #b9d4099f !important;
@@ -206,7 +232,7 @@
             #excelPreview th {
                 background-color: rgba(255, 255, 0, 0.482) !important;
             }
-           
+
             #excelPreview th,
             #excelPreview td {
                 padding: 12px;
@@ -235,18 +261,39 @@
                 position: sticky;
                 bottom: 0;
                 z-index: 2;
-                background-color: rgba(255, 255, 0, 0.482) !important; /* Match your header color */
+                background-color: rgba(
+                    255,
+                    255,
+                    0,
+                    0.482
+                ) !important; /* Match your header color */
                 font-weight: bold;
             }
 
-
+            @keyframes fadeInUp {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.5) translateY(40px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+            .fade-in-up {
+                opacity: 0;
+                animation: fadeInUp 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55)
+                    forwards;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1><i class="ri-calendar-check-fill"></i> Dashboard</h1>
+            <h1 class="fade-in-up">
+                <i class="ri-calendar-check-fill"></i> Dashboard
+            </h1>
 
-            <form id="subjectForm">
+            <form id="subjectForm" class="fade-in-up">
                 <input
                     type="text"
                     id="subjectInput"
@@ -257,9 +304,9 @@
                 </button>
             </form>
 
-            <div class="subject-list" id="subjectList"></div>
+            <div class="subject-list fade-in-up" id="subjectList"></div>
 
-            <div class="actions">
+            <div class="actions fade-in-up">
                 <button id="showExcel">
                     <i class="ri-table-line"></i> Show Excel
                 </button>
@@ -270,5 +317,13 @@
 
             <div id="excelPreview"></div>
         </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll(".fade-in-up").forEach((el, i) => {
+                    el.style.animationDelay = i * 0.2 + "s";
+                });
+            });
+        </script>
     </body>
 </html>
