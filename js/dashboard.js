@@ -322,7 +322,7 @@ const summaryRows = [
     ["Total A", ...subjects.map(subj => subj.attendance.filter(a => a.status === "A").length)]
 ];
 
-    const header = ["Date", ...subjects.map((s) => s.name)];
+    const header = ["Subjects", ...subjects.map((s) => s.name)];
     const rows = dates.map((date) => {
         const row = [formatDate(date)];
         subjects.forEach((subj) => {
