@@ -110,6 +110,10 @@ async function fetchAttendance(animateDate = null) {
           <button class="remove-btn" title="Remove attendance" onclick="removeAttendance('${entry.date}')">&#10006;</button>
         `;
             logList.appendChild(logItem);
+
+            // Increment stats
+            if (entry.status === "P") totalP++;
+            if (entry.status === "A") totalA++;
         });
 
         const percentage =
