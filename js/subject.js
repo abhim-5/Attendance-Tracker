@@ -121,12 +121,82 @@ async function fetchAttendance(animateDate = null) {
                 ? ((totalP / (totalP + totalA)) * 100).toFixed(1)
                 : "N/A";
 
+        // Get or set benchmark from localStorage, default 75
+        let benchmark = parseFloat(localStorage.getItem("attendanceBenchmark")) || 75;
+        let extraA = parseInt(localStorage.getItem("attendanceExtraA")) || 0;
+        let extraP = 0;
+
+        // Helper functions
+        function calcExtraP(totalP, totalA, extraA, percent) {
+            // (totalP + x) / (totalP + totalA + extraA + x) >= percent/100
+            // x >= (percent*(totalA+extraA) - (1-percent)*totalP) / (1-percent)
+            const b = percent / 100;
+            const denom = 1 - b;
+            if (denom <= 0) return 0;
+            const x = Math.max(0, Math.ceil((b * (totalA + extraA) - (1 - b) * totalP) / denom));
+            return x;
+        }
+        function calcExtraA(totalP, totalA, extraP, percent) {
+            // (totalP + extraP) / (totalP + totalA + x + extraP) >= percent/100
+            // x <= ((totalP + extraP)/percent - (totalP + totalA + extraP))
+            const b = percent / 100;
+            if (b <= 0) return 0;
+            const x = Math.max(0, Math.floor((totalP + extraP) / b - (totalP + totalA + extraP)));
+            return x;
+        }
+
+        // Initial calculation
+        extraP = calcExtraP(totalP, totalA, extraA, benchmark);
+
+        // Stats box HTML
         statsDiv.innerHTML = `
-      <h3><i class="ri-bar-chart-2-fill"></i> Attendance Stats</h3>
-      <p><strong>Total Present:</strong> ${totalP}</p>
-      <p><strong>Total Absent:</strong> ${totalA}</p>
-      <p><strong>Percentage:</strong> ${percentage}%</p>
-    `;
+          <h3><i class="ri-bar-chart-2-fill"></i> Attendance Stats</h3>
+          <p><strong>Current Presents :</strong> ${totalP}</p>
+          <p><strong>Current Absents :</strong> ${totalA}</p>
+          <p><strong>Current Attendance :</strong> ${percentage}%</p>
+          <label><strong>Benchmark (%) :</strong>
+            <input id="benchmarkInput" type="number" min="1" max="100" value="${benchmark}" style="width:60px; margin-left:8px; margin-bottom:2px;">
+          </label>
+          
+          <label><strong>Extra A's :</strong>
+            <input id="extraAInput" type="number" min="0" value="${extraA}" style="width:60px; margin-left:8px; margin-bottom:2px;">
+          </label>
+          
+          <label><strong>Extra P's :</strong>
+            <input id="extraPInput" type="number" min="0" value="${extraP}" style="width:60px; margin-left:8px; margin-bottom:3px;">
+          </label>
+        `;
+
+        // Sync logic
+        const benchmarkInput = document.getElementById("benchmarkInput");
+        const extraAInput = document.getElementById("extraAInput");
+        const extraPInput = document.getElementById("extraPInput");
+
+        function updateFields(source) {
+            let b = parseFloat(benchmarkInput.value) || 75;
+            let a = parseInt(extraAInput.value) || 0;
+            let p = parseInt(extraPInput.value) || 0;
+
+            if (b < 1) b = 1;
+            if (b > 100) b = 100;
+
+            if (source === "benchmark" || source === "A") {
+                // Update extraP based on extraA and benchmark
+                p = calcExtraP(totalP, totalA, a, b);
+                extraPInput.value = p;
+            } else if (source === "P") {
+                // Update extraA based on extraP and benchmark
+                a = calcExtraA(totalP, totalA, p, b);
+                extraAInput.value = a;
+            }
+
+            localStorage.setItem("attendanceBenchmark", b);
+            localStorage.setItem("attendanceExtraA", extraAInput.value);
+        }
+
+        benchmarkInput.addEventListener("input", () => updateFields("benchmark"));
+        extraAInput.addEventListener("input", () => updateFields("A"));
+        extraPInput.addEventListener("input", () => updateFields("P"));
     } catch (err) {
         console.error("Error fetching attendance:", err);
         statsDiv.innerHTML = "<p>Error loading attendance data.</p>";
@@ -155,3 +225,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+const dateInput = document.getElementById("datePicker");
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, "0");
+const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+const yyyy = today.getFullYear();
+dateInput.value = `${yyyy}-${mm}-${dd}`;

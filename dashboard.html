@@ -46,7 +46,7 @@
                     inset: 0;
                     z-index: -1;
                     background: url("/assets/yellowr.jpg") no-repeat center center;
-                    background-size: 110% 100%;
+                    background-size: 100% 100%;
                     overflow-x:none;
                     width: 100vw;
                     height: 100vh;
@@ -54,6 +54,9 @@
                     top: 0;
                     opacity: 1;
                     pointer-events: none;
+                }
+                .actions button {
+                    padding: 12px 10px ;
                 }
             }
 
@@ -99,6 +102,7 @@
             }
 
             .subject-card {
+                position: relative;
                 background: #111;
                 padding: 20px;
                 border-radius: 10px;
@@ -121,6 +125,15 @@
             .subject-card p {
                 margin: 5px 0;
                 color: #ccc;
+            }
+
+            .subject-card .subject-name {
+                max-width: 140px; /* Adjust as needed */
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: inline-block;
+                vertical-align: middle;
             }
 
             .actions {
@@ -230,7 +243,7 @@
                 min-width: 600px;
             }
             #excelPreview th {
-                background-color: rgba(255, 255, 0, 0.482) !important;
+                background-color: #848409 !important;
             }
 
             #excelPreview th,
@@ -245,7 +258,7 @@
             #excelPreview td:first-child {
                 position: sticky;
                 left: 0;
-                background: rgba(111, 178, 44, 0.482) !important;
+                background: rgba(111, 178, 44, 0.482) ;
                 z-index: 2;
                 min-width: 50px; /* Reduced from 110px */
                 max-width: 90px;

@@ -18,11 +18,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Switch between login/register tab
   loginTab.addEventListener("click", () => {
+    // Prevent switching to login if verification is pending
+    if (verificationCode) {
+      errorMsg.textContent = "Please enter the verification code to complete registration.";
+      return;
+    }
     isLoginMode = true;
     loginTab.classList.add("active");
     registerTab.classList.remove("active");
     submitBtn.textContent = "Login";
     errorMsg.textContent = "";
+
+    // Change password input placeholder for login
+    const passwordInput = document.getElementById("password");
+    if (passwordInput) passwordInput.placeholder = "Password";
   });
 
   registerTab.addEventListener("click", () => {
@@ -31,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loginTab.classList.remove("active");
     submitBtn.textContent = "Register";
     errorMsg.textContent = "";
+
+    // Change password input placeholder for register
+    const passwordInput = document.getElementById("password");
+    if (passwordInput) passwordInput.placeholder = "Set Password";
 
     // Show code input if needed
     showCodeInput(false);

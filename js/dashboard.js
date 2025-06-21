@@ -77,7 +77,7 @@ async function loadSubjects(userId) {
         card.className = "subject-card";
         card.innerHTML = `
   <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h3 style="margin:0;flex:1;cursor:pointer;" class="subject-name">${data.name}</h3>
+    <h3 style="margin:0;flex:1;cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="subject-name">${data.name}</h3>
     <button class="edit-btn" title="Edit Subject" style="margin-left:8px;">✏️</button>
     <button class="delete-btn" title="Delete Subject" style="margin-left:4px;">🗑️</button>
   </div>
@@ -156,19 +156,64 @@ async function renderExcelPreview() {
 
     const dates = Array.from(dateMap.keys()).sort();
     const table = document.createElement("table");
+    table.style.fontSize = "0.9rem"; 
 
+    // --- Summary rows ---
+    const summaryRows = [
+        {
+            label: "Attendance",
+            getValue: (subj) => {
+                const p = subj.attendance.filter((a) => a.status === "P").length;
+                const a = subj.attendance.filter((a) => a.status === "A").length;
+                const total = p + a;
+                return total === 0 ? "N/A" : Math.round((p / total) * 100) + "%";
+            },
+        },
+    ];
+
+    summaryRows.forEach((rowInfo, rowIdx) => {
+        const tr = document.createElement("tr");
+        const th = document.createElement("th");
+        th.textContent = rowInfo.label;
+        tr.appendChild(th);
+        subjects.forEach((subj) => {
+            const td = document.createElement("td");
+            td.textContent = rowInfo.getValue(subj);
+            td.style.fontWeight = "bold";
+            tr.appendChild(td);
+        });
+        if (rowIdx === 0) {
+            // Apply #848409 color to all cells in the first summary row
+             Array.from(tr.children).forEach(cell => {
+                cell.style.background = "#848409";
+                cell.style.color = "#111"; 
+             });
+          
+        }
+        table.appendChild(tr);
+    });
+
+    // --- Header row ---
     const headerRow = document.createElement("tr");
     const dateTh = document.createElement("th");
-    dateTh.textContent = "📅 Date";
+    dateTh.textContent = "Subjects"; // 
     headerRow.appendChild(dateTh);
+
+
+
 
     subjects.forEach((subj) => {
         const th = document.createElement("th");
         th.textContent = subj.name;
         headerRow.appendChild(th);
     });
-
     table.appendChild(headerRow);
+
+    // For the header row (Subjects)
+    Array.from(headerRow.children).forEach(cell => {
+        cell.style.background = "#848409";
+        cell.style.color = "#000 !important";
+    });
 
     dates.forEach((date) => {
         const tr = document.createElement("tr");
@@ -190,6 +235,17 @@ async function renderExcelPreview() {
         table.appendChild(tr);
     });
 
+    // Set column widths for Excel preview table (smaller but enough for text)
+const colCount = subjects.length + 1; // +1 for the date/subject column
+const colgroup = document.createElement("colgroup");
+for (let i = 0; i < colCount; i++) {
+    const col = document.createElement("col");
+    // First column (Subjects/Dates) a bit wider, others smaller but enough for text
+    col.style.width = i === 0 ? "80px" : "80px";
+    colgroup.appendChild(col);
+}
+table.prepend(colgroup);
+
     preview.style.display = "block";
     const container = preview.parentElement;
     let heading = container.querySelector("#excelPreviewHeading");
@@ -203,23 +259,29 @@ async function renderExcelPreview() {
     preview.innerHTML = "";
     preview.appendChild(table);
 
-    // Sticky bottom header for long tables
+    // Sticky bottom summary rows for long tables
     const dataRowCount = dates.length;
     if (dataRowCount > 15) {
-        const headerRowClone = table.querySelector("tr").cloneNode(true);
-        headerRowClone.classList.add("sticky-bottom-row");
-        table.appendChild(headerRowClone);
+        const rows = table.querySelectorAll("tr");
+        if (rows.length >= 2) {
+            const firstRowClone = rows[0].cloneNode(true);
+            const secondRowClone = rows[1].cloneNode(true);
 
-        const ths = table.querySelectorAll(
-            "tr:first-child th, tr:first-child td"
-        );
-        const tds = table.querySelectorAll(
-            "tr:last-child th, tr:last-child td"
-        );
-        tds.forEach((td, i) => {
-            td.className = ths[i].className;
-            td.style = ths[i].style.cssText;
-        });
+            // Set ALL cells in both rows to #848409 and white text
+            Array.from(firstRowClone.children).forEach(cell => {
+                cell.style.background = "#848409";
+                cell.style.color = "#111";
+            });
+            Array.from(secondRowClone.children).forEach(cell => {
+                cell.style.background = "#848409";
+                cell.style.color = "#fff";
+            });
+
+            firstRowClone.classList.add("sticky-bottom-row");
+            secondRowClone.classList.add("sticky-bottom-row");
+            table.appendChild(firstRowClone);
+            table.appendChild(secondRowClone);
+        }
     }
 }
 
@@ -248,6 +310,18 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
     });
 
     const dates = Array.from(dateMap.keys()).sort();
+
+const summaryRows = [
+    ["Attendance %", ...subjects.map(subj => {
+        const p = subj.attendance.filter(a => a.status === "P").length;
+        const a = subj.attendance.filter(a => a.status === "A").length;
+        const total = p + a;
+        return total === 0 ? "N/A" : Math.round((p / total) * 100) + "%";
+    })],
+    ["Total P", ...subjects.map(subj => subj.attendance.filter(a => a.status === "P").length)],
+    ["Total A", ...subjects.map(subj => subj.attendance.filter(a => a.status === "A").length)]
+];
+
     const header = ["Date", ...subjects.map((s) => s.name)];
     const rows = dates.map((date) => {
         const row = [formatDate(date)];
@@ -257,45 +331,56 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
         return row;
     });
 
-    const finalData = [header, ...rows];
+    // Place summary rows at the very top, then header, then data
+    const finalData = [...summaryRows, header, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(finalData);
     ws["!cols"] = [{ wch: 14 }, ...subjects.map(() => ({ wch: 12 }))];
 
     const totalRows = finalData.length;
     const totalCols = header.length;
 
-    for (let r = 0; r < totalRows; r++) {
-        for (let c = 0; c < totalCols; c++) {
-            const cell = ws[XLSX.utils.encode_cell({ r, c })];
-            if (cell) {
-                if (!cell.s) cell.s = {};
-                cell.s.alignment = { horizontal: "center", vertical: "center" };
-            }
-        }
-    }
-
-    header.forEach((col, idx) => {
-        const cell = ws[XLSX.utils.encode_cell({ r: 0, c: idx })];
+    // Make every cell center aligned in the sheet
+for (let r = 0; r < totalRows; r++) {
+    for (let c = 0; c < totalCols; c++) {
+        const cell = ws[XLSX.utils.encode_cell({ r, c })];
         if (cell) {
-            cell.s = { font: { bold: true } };
-        }
-    });
-
-    for (let r = 1; r <= dates.length; r++) {
-        const cell = ws[XLSX.utils.encode_cell({ r, c: 0 })];
-        if (cell) {
-            cell.s = { font: { bold: true } };
+            if (!cell.s) cell.s = {};
+            cell.s.alignment = { horizontal: "center", vertical: "center" };
         }
     }
+}
 
-    for (let r = 1; r <= dates.length; r++) {
-        for (let c = 1; c <= subjects.length; c++) {
-            const cell = ws[XLSX.utils.encode_cell({ r, c })];
-            if (cell && (cell.v === "P" || cell.v === "A")) {
-                cell.s = { font: { bold: true } };
-            }
+ // Make header row bold (already center aligned)
+header.forEach((col, idx) => {
+    const cell = ws[XLSX.utils.encode_cell({ r: 0, c: idx })];
+    if (cell) {
+        cell.s = cell.s || {};
+        cell.s.font = { bold: true };
+        cell.s.alignment = { horizontal: "center", vertical: "center" };
+    }
+});
+
+// Make first column (Date) bold (already center aligned)
+for (let r = 1; r < finalData.length; r++) {
+    const cell = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+    if (cell) {
+        cell.s = cell.s || {};
+        cell.s.font = { bold: true };
+        cell.s.alignment = { horizontal: "center", vertical: "center" };
+    }
+}
+
+// Make "P" and "A" cells bold (keep center alignment)
+for (let r = 1; r < finalData.length; r++) {
+    for (let c = 1; c <= subjects.length; c++) {
+        const cell = ws[XLSX.utils.encode_cell({ r, c })];
+        if (cell && (cell.v === "P" || cell.v === "A")) {
+            cell.s = cell.s || {};
+            cell.s.font = { bold: true };
+            cell.s.alignment = { horizontal: "center", vertical: "center" };
         }
     }
+}
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Attendance");
