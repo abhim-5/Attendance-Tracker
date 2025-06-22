@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let recaptchaWidgetId = null;
 
   // Initialize EmailJS with your user ID
-  emailjs.init("HA3a7MR2p1tyoa3bC");
+  // emailjs.init("HA3a7MR2p1tyoa3bC");
 
   function toggleRegisterFields(show) {
     document.querySelectorAll('.register-only').forEach(el => {
@@ -119,11 +119,18 @@ document.addEventListener("DOMContentLoaded", () => {
         pendingEmail = email;
         pendingPassword = password;
 
-        await emailjs.send("service_0us6ims", "template_9ib0sgj", {
-          email: email,
-          passcode: verificationCode,
-          time: "15 minutes"
+        const sendCodeRes = await fetch('https://attendance-tracker-scvl.onrender.com/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            code: verificationCode
+          })
         });
+        const sendCodeData = await sendCodeRes.json();
+        if (!sendCodeData.success) {
+          throw new Error("Failed to send verification code email.");
+        }
 
         // Show modal for code entry
         document.getElementById("verificationModal").style.display = "flex";
