@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let verificationCode = null;
   let pendingEmail = null;
   let pendingPassword = null;
+  let recaptchaWidgetId = null;
 
   // Initialize EmailJS with your user ID
   emailjs.init("HA3a7MR2p1tyoa3bC");
@@ -58,6 +59,15 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMsg.textContent = "";
 
     toggleRegisterFields(true);
+
+    // Render reCAPTCHA if not already rendered
+    setTimeout(() => {
+      if (typeof grecaptcha !== "undefined" && recaptchaWidgetId === null) {
+        recaptchaWidgetId = grecaptcha.render("recaptcha", {
+          sitekey: "6LeDlWkrAAAAAKgnBjnb2c6u-vZYcBYA7qSAMKeS" 
+        });
+      }
+    }, 300);
   });
 
   // Auth form submission
@@ -86,6 +96,23 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         // Registration validation
         if (password !== confirmPassword) throw new Error("Passwords do not match.");
+
+        // reCAPTCHA validation
+        const recaptchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
+        if (!recaptchaResponse) {
+          throw new Error("Please complete the reCAPTCHA.");
+        }
+
+        // Send token to backend for verification
+        const verifyRes = await fetch('https://YOUR_BACKEND_URL/verify-recaptcha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: recaptchaResponse })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) {
+          throw new Error("reCAPTCHA verification failed. Please try again.");
+        }
 
         // Step 1: Send code
         verificationCode = Math.floor(100000 + Math.random() * 900000).toString();

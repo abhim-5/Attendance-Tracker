@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <style>
     
   </style>
@@ -34,6 +35,11 @@
 
       <!-- Only for Register -->
       <input type="password" id="confirmPassword" placeholder="Confirm Password" class="register-only" style="display:none;" />
+
+      <!-- reCAPTCHA -->
+      <div class="register-only" id="recaptcha-container" style="display:none; margin: 0 auto 10px auto;">
+        <div id="recaptcha"></div>
+      </div>
 
       <button type="submit" id="submitBtn">Login</button>
     </form>
