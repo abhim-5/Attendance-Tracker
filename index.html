@@ -28,7 +28,13 @@
     <!-- Form -->
     <form id="authForm" class="fade-in">
       <input type="email" id="email" placeholder="Email" required />
+
+      <!-- Password for both Login and Register, but placeholder changes -->
       <input type="password" id="password" placeholder="Password" required />
+
+      <!-- Only for Register -->
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required class="register-only" style="display:none;" />
+
       <button type="submit" id="submitBtn">Login</button>
     </form>
 
@@ -39,6 +45,16 @@
     </div>
 
     <p id="errorMsg" class="error-msg"></p>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="verificationModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#222; padding:32px 24px; border-radius:12px; box-shadow:0 0 20px #000; max-width:350px; margin:auto; text-align:center;">
+      <h3 style="color:#00d8ff;">Enter Verification Code</h3>
+      <input type="text" id="codeInput" placeholder="Verification code" style="margin:16px 0; width:90%; padding:8px;"/>
+      <button id="verifyCodeBtn" style="width:100%; padding:10px 0; background:#00d8ff; color:#111; border:none; border-radius:6px; font-weight:bold;">Verify</button>
+      <p id="codeErrorMsg" style="color:#ff1744; margin-top:10px;"></p>
+    </div>
   </div>
 
   <script src="js/firebase-config.js"></script>

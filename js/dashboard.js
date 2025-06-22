@@ -68,8 +68,8 @@ async function loadSubjects(userId) {
         const data = doc.data();
         const attendance = data.attendance || [];
 
-        const totalP = attendance.filter((d) => d.status === "P").length;
-        const totalA = attendance.filter((d) => d.status === "A").length;
+        const totalP = attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "P").length : (a.status === "P" ? 1 : 0)), 0);
+        const totalA = attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "A").length : (a.status === "A" ? 1 : 0)), 0);
         const total = totalP + totalA;
         const percentage = total === 0 ? 0 : Math.round((totalP / total) * 100);
 
@@ -163,12 +163,12 @@ async function renderExcelPreview() {
         {
             label: "Attendance",
             getValue: (subj) => {
-                const p = subj.attendance.filter((a) => a.status === "P").length;
-                const a = subj.attendance.filter((a) => a.status === "A").length;
+                const p = subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "P").length : (a.status === "P" ? 1 : 0)), 0);
+                const a = subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "A").length : (a.status === "A" ? 1 : 0)), 0);
                 const total = p + a;
                 return total === 0 ? "N/A" : Math.round((p / total) * 100) + "%";
             },
-        },
+        }
     ];
 
     summaryRows.forEach((rowInfo, rowIdx) => {
@@ -223,12 +223,14 @@ async function renderExcelPreview() {
 
         subjects.forEach((subj) => {
             const td = document.createElement("td");
-            const val = dateMap.get(date)?.[subj.name] || "";
-            td.textContent = val;
-
-            if (val === "P") td.classList.add("present");
-            if (val === "A") td.classList.add("absent");
-
+            const valArr = dateMap.get(date)?.[subj.name];
+            if (Array.isArray(valArr)) {
+                td.innerHTML = valArr.map(v =>
+                    `<span class="${v === "P" ? "present" : v === "A" ? "absent" : ""}">${v}</span>`
+                ).join(" ");
+            } else {
+                td.innerHTML = valArr ? `<span class="${valArr === "P" ? "present" : valArr === "A" ? "absent" : ""}">${valArr}</span>` : "";
+            }
             tr.appendChild(td);
         });
 
@@ -313,20 +315,22 @@ document.getElementById("downloadExcel").addEventListener("click", async () => {
 
 const summaryRows = [
     ["Attendance %", ...subjects.map(subj => {
-        const p = subj.attendance.filter(a => a.status === "P").length;
-        const a = subj.attendance.filter(a => a.status === "A").length;
+        const p = subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "P").length : (a.status === "P" ? 1 : 0)), 0);
+        const a = subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "A").length : (a.status === "A" ? 1 : 0)), 0);
         const total = p + a;
         return total === 0 ? "N/A" : Math.round((p / total) * 100) + "%";
     })],
-    ["Total P", ...subjects.map(subj => subj.attendance.filter(a => a.status === "P").length)],
-    ["Total A", ...subjects.map(subj => subj.attendance.filter(a => a.status === "A").length)]
+    ["Total P", ...subjects.map(subj => subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "P").length : (a.status === "P" ? 1 : 0)), 0))],
+    ["Total A", ...subjects.map(subj => subj.attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "A").length : (a.status === "A" ? 1 : 0)), 0))]
 ];
 
     const header = ["Subjects", ...subjects.map((s) => s.name)];
     const rows = dates.map((date) => {
         const row = [formatDate(date)];
         subjects.forEach((subj) => {
-            row.push(dateMap.get(date)?.[subj.name] || "");
+            // row.push(dateMap.get(date)?.[subj.name] || "");
+            const valArr = dateMap.get(date)?.[subj.name];
+            row.push(Array.isArray(valArr) ? valArr.join(" ") : (valArr || ""));
         });
         return row;
     });

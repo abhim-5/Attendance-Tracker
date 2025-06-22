@@ -12,7 +12,6 @@ function formatDate(dateStr) {
 window.markAttendance = async function (status) {
     const selectedDate = document.getElementById("datePicker").value;
     const subjectId = localStorage.getItem("subjectId");
-
     if (!subjectId || !selectedDate) {
         alert("Missing subject or date info!");
         return;
@@ -28,16 +27,27 @@ window.markAttendance = async function (status) {
         const data = doc.data();
         let attendance = Array.isArray(data.attendance) ? data.attendance : [];
 
-        // Update or add attendance for the date
-        const existing = attendance.find((a) => a.date === selectedDate);
-        if (existing) {
-            existing.status = status;
+        // Find or create entry for the date
+        let entry = attendance.find((a) => a.date === selectedDate);
+
+        if (entry) {
+            // Ask if user wants to add multiple
+            if (confirm("Do you want to add multiple P/A for this date?")) {
+                if (Array.isArray(entry.status)) {
+                    entry.status.push(status);
+                } else {
+                    entry.status = [entry.status, status];
+                }
+            } else {
+                entry.status = [status]; // Overwrite with single
+            }
         } else {
-            attendance.push({ date: selectedDate, status });
+            entry = { date: selectedDate, status: [status] };
+            attendance.push(entry);
         }
 
         await subjectRef.update({ attendance });
-        fetchAttendance(selectedDate); // Pass the date you just marked
+        fetchAttendance(selectedDate);
     } catch (err) {
         console.error("Error marking attendance:", err);
         alert("Failed to mark attendance. Try again.");
@@ -86,34 +96,37 @@ async function fetchAttendance(animateDate = null) {
             ? data.attendance
             : [];
 
-        let totalP = 0,
-            totalA = 0;
+        const totalP = attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "P").length : (a.status === "P" ? 1 : 0)), 0);
+        const totalA = attendance.reduce((sum, a) => sum + (Array.isArray(a.status) ? a.status.filter(s => s === "A").length : (a.status === "A" ? 1 : 0)), 0);
+
         logList.innerHTML = "";
 
         attendance.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         attendance.forEach((entry) => {
             const logItem = document.createElement("div");
-            logItem.className = `log-entry ${entry.status === "P" ? "present" : "absent"}`;
+            logItem.className = "log-entry";
 
             // Animate only the log that matches animateDate
             if (animateDate && entry.date === animateDate) {
                 logItem.classList.add("animated-in");
             }
 
-            logItem.innerHTML = `
-          <span>
-            <i class="${entry.status === "P" ? "ri-checkbox-circle-line" : "ri-close-circle-line"}"></i>
-            ${formatDate(entry.date)}
-          </span>
-          <span class="tag ${entry.status === "P" ? "present-tag" : "absent-tag"}">${entry.status}</span>
-          <button class="remove-btn" title="Remove attendance" onclick="removeAttendance('${entry.date}')">&#10006;</button>
-        `;
-            logList.appendChild(logItem);
+            // Render all statuses for the date
+            let statusHtml = "";
+            (Array.isArray(entry.status) ? entry.status : [entry.status]).forEach(s => {
+                statusHtml += `<span class="tag ${s === "P" ? "present-tag" : "absent-tag"}">${s}</span> `;
+            });
 
-            // Increment stats
-            if (entry.status === "P") totalP++;
-            if (entry.status === "A") totalA++;
+            logItem.innerHTML = `
+              <span>
+                <i class="ri-calendar-check-line"></i>
+                ${formatDate(entry.date)}
+              </span>
+              <span>${statusHtml.trim()}</span>
+              <button class="remove-btn" title="Remove attendance" onclick="removeAttendance('${entry.date}')">&#10006;</button>
+            `;
+            logList.appendChild(logItem);
         });
 
         const percentage =
