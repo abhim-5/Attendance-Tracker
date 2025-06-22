@@ -171,3 +171,16 @@ button[type="submit"]:hover {
     pointer-events: none;
   }
 }
+
+/* Make reCAPTCHA responsive */
+#recaptcha-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#recaptcha > div {
+  transform: scale(0.85); /* Adjust scale as needed */
+  transform-origin: 0 0;
+  max-width: 100%;
+}
