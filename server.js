@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const SECRET_KEY = '6LeDlWkrAAAAAE7cjZSWdBX6qZycu9AWQmuwljoq'; // Your secret key
+const SECRET_KEY = process.env.SECRET_KEY;
 
 app.post('/verify-recaptcha', async (req, res) => {
   const token = req.body.token;

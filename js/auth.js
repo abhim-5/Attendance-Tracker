@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Send token to backend for verification
-        const verifyRes = await fetch('https://YOUR_BACKEND_URL/verify-recaptcha', {
+        const verifyRes = await fetch('https://attendance-tracker-scvl.onrender.com/verify-recaptcha', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: recaptchaResponse })
