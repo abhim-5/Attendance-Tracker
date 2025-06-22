@@ -4,7 +4,10 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://track-a.netlify.app'],
+  credentials: true
+}));
 app.use(express.json());
 
 const SECRET_KEY = process.env.SECRET_KEY;
