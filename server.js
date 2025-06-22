@@ -1,6 +1,5 @@
 // server.js
 const express = require('express');
-const fetch = require('node-fetch');
 const cors = require('cors');
 const app = express();
 
@@ -16,7 +15,7 @@ app.post('/verify-recaptcha', async (req, res) => {
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${SECRET_KEY}&response=${token}`;
   try {
-    const googleRes = await fetch(url, { method: 'POST' });
+    const googleRes = await fetch(url, { method: 'POST' }); // Use global fetch
     const data = await googleRes.json();
     console.log("Google response:", data);
     res.json({ success: data.success });
