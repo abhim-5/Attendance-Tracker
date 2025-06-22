@@ -1,6 +1,7 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 const app = express();
 
 app.use(cors());
@@ -27,29 +28,31 @@ app.post('/verify-recaptcha', async (req, res) => {
 
 app.post('/send-code', async (req, res) => {
   const { email, code } = req.body;
-  if (!email || !code) return res.status(400).json({ success: false, message: "Missing email or code" });
+  if (!email || !code) {
+    return res.status(400).json({ success: false, message: "Missing email or code" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    auth: {
+      user: "903fde001@smtp-brevo.com", // your Brevo SMTP login
+      pass: "hr8KsCgt71zaDnQH"          // your Brevo SMTP password
+    }
+  });
+
+  const mailOptions = {
+    from: '"Attendance Tracker" <your_verified_sender@gmail.com>', // use your verified sender email
+    to: email,
+    subject: 'Your Attendance Tracker Verification Code',
+    html: `<p>Your verification code is: <b>${code}</b><br>This code is valid for 15 minutes.</p>`
+  };
 
   try {
-    const resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer re_RsDwMDjH_EREhqYAXF9vTsq5rmU1uKBuo',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'Attendance Tracker <onboarding@resend.dev>',
-        to: email,
-        subject: 'Your Attendance Tracker Verification Code',
-        html: `<p>Your verification code is: <b>${code}</b><br>This code is valid for 15 minutes.</p>`
-      })
-    });
-    const data = await resendRes.json();
-    if (resendRes.ok) {
-      res.json({ success: true });
-    } else {
-      res.status(500).json({ success: false, message: data.message || "Failed to send email" });
-    }
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true });
   } catch (err) {
+    console.error("Error sending code:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
