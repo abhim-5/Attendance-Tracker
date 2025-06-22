@@ -42,7 +42,7 @@ app.post('/send-code', async (req, res) => {
   });
 
   const mailOptions = {
-    from: '"Attendance Tracker" <your_verified_sender@gmail.com>', // use your verified sender email
+    from: '"Attendance Tracker" <your_verified_sender@gmail.com>', // <-- must match a verified sender in Brevo
     to: email,
     subject: 'Your Attendance Tracker Verification Code',
     html: `<p>Your verification code is: <b>${code}</b><br>This code is valid for 15 minutes.</p>`
