@@ -1,4 +1,6 @@
 // server.js
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -14,17 +16,14 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 app.post('/verify-recaptcha', async (req, res) => {
   const token = req.body.token;
-  console.log("Received token:", token);
   if (!token) return res.json({ success: false });
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${SECRET_KEY}&response=${token}`;
   try {
     const googleRes = await fetch(url, { method: 'POST' }); 
     const data = await googleRes.json();
-    console.log("Google response:", data);
     res.json({ success: data.success });
   } catch (err) {
-    console.error("Error verifying reCAPTCHA:", err);
     res.json({ success: false });
   }
 });
@@ -39,13 +38,8 @@ app.post('/send-code', async (req, res) => {
     host: "smtp-relay.brevo.com",
     port: 587,
     auth: {
-<<<<<<< HEAD
-      user: brevo_user, 
-      pass: brevo_pass       
-=======
-      user: "903fde001@smtp-brevo.com",
-      pass: "hr8KsCgt71zaDnQH"          
->>>>>>> fcb2033002c010d0d14c115248585a39927c47b8
+      user: process.env.brevo_user,
+      pass: process.env.brevo_pass
     }
   });
 
@@ -60,7 +54,6 @@ app.post('/send-code', async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ success: true });
   } catch (err) {
-    console.error("Error sending code:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
