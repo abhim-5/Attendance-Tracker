@@ -39,8 +39,13 @@ app.post('/send-code', async (req, res) => {
     host: "smtp-relay.brevo.com",
     port: 587,
     auth: {
+<<<<<<< HEAD
       user: brevo_user, 
       pass: brevo_pass       
+=======
+      user: "903fde001@smtp-brevo.com",
+      pass: "hr8KsCgt71zaDnQH"          
+>>>>>>> fcb2033002c010d0d14c115248585a39927c47b8
     }
   });
 
