@@ -39,13 +39,13 @@ app.post('/send-code', async (req, res) => {
     host: "smtp-relay.brevo.com",
     port: 587,
     auth: {
-      user: "903fde001@smtp-brevo.com", // your Brevo SMTP login
-      pass: "hr8KsCgt71zaDnQH"          // your Brevo SMTP password
+      user: "903fde001@smtp-brevo.com",
+      pass: "hr8KsCgt71zaDnQH"          
     }
   });
 
   const mailOptions = {
-    from: '"Attendance Tracker" <attendancetracker.dev@gmail.com>', // <-- use this verified sender
+    from: '"Attendance Tracker" <attendancetracker.dev@gmail.com>', 
     to: email,
     subject: 'Your Attendance Tracker Verification Code',
     html: `<p>Your verification code is: <b>${code}</b><br>This code is valid for 15 minutes.</p>`
