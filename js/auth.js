@@ -15,8 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let pendingPassword = null;
   let recaptchaWidgetId = null;
 
-  // Initialize EmailJS with your user ID
-  // emailjs.init("HA3a7MR2p1tyoa3bC");
+
 
   function toggleRegisterFields(show) {
     document.querySelectorAll('.register-only').forEach(el => {
