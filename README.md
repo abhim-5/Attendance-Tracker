@@ -1,0 +1,1 @@
+ It is a secure, all-in-one platform with Google reCAPTCHA and email OTP login. It supports Excel preview/download, multiple P/A entries per day, and tracks attendance benchmarks like 75% with real-time insights and reports.
