@@ -19,7 +19,7 @@ app.post('/verify-recaptcha', async (req, res) => {
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${SECRET_KEY}&response=${token}`;
   try {
-    const googleRes = await fetch(url, { method: 'POST' }); // Use global fetch
+    const googleRes = await fetch(url, { method: 'POST' }); 
     const data = await googleRes.json();
     console.log("Google response:", data);
     res.json({ success: data.success });
@@ -39,13 +39,13 @@ app.post('/send-code', async (req, res) => {
     host: "smtp-relay.brevo.com",
     port: 587,
     auth: {
-      user: "903fde001@smtp-brevo.com", // your Brevo SMTP login
-      pass: "hr8KsCgt71zaDnQH"          // your Brevo SMTP password
+      user: brevo_user, 
+      pass: brevo_pass       
     }
   });
 
   const mailOptions = {
-    from: '"Attendance Tracker" <attendancetracker.dev@gmail.com>', // <-- use this verified sender
+    from: '"Attendance Tracker" <attendancetracker.dev@gmail.com>', 
     to: email,
     subject: 'Your Attendance Tracker Verification Code',
     html: `<p>Your verification code is: <b>${code}</b><br>This code is valid for 15 minutes.</p>`
