@@ -185,4 +185,20 @@ document.addEventListener("DOMContentLoaded", () => {
       codeErrorMsg.textContent = err.message || "Registration failed.";
     }
   };
+
+  document.getElementById("email").addEventListener("blur", async function() {
+    if (!isLoginMode) {
+      const email = this.value.trim();
+      if (email) {
+        const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+        if (signInMethods.length > 0) {
+          errorMsg.textContent = "User already registered. Please login.";
+          submitBtn.disabled = true;
+        } else {
+          errorMsg.textContent = "";
+          submitBtn.disabled = false;
+        }
+      }
+    }
+  });
 });
