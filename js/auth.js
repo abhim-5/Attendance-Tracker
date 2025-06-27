@@ -96,6 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Registration validation
         if (password !== confirmPassword) throw new Error("Passwords do not match.");
 
+        // Check if user already exists
+        const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+        if (signInMethods.length > 0) {
+          throw new Error("User already registered. Please login.");
+        }
+
         // reCAPTCHA validation
         const recaptchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
         if (!recaptchaResponse) {
