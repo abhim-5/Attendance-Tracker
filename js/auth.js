@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleRegisterFields(false);
   });
 
-  registerTab.addEventListener("click", () => {
+  registerTab.addEventListener("click", async () => {
     isLoginMode = false;
     registerTab.classList.add("active");
     loginTab.classList.remove("active");
@@ -58,6 +58,20 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMsg.textContent = "";
 
     toggleRegisterFields(true);
+
+    // Check if email is already registered (if email is filled)
+    const email = document.getElementById("email").value.trim();
+    if (email) {
+      const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+      if (signInMethods.length > 0) {
+        errorMsg.textContent = "User already registered. Please login.";
+        // Optionally, you can disable the Register button here
+        submitBtn.disabled = true;
+        return;
+      } else {
+        submitBtn.disabled = false;
+      }
+    }
 
     // Render reCAPTCHA if not already rendered
     setTimeout(() => {
